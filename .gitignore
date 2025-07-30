@@ -1,0 +1,8 @@
+.env
+node_modules
+dist
+build
+/generated/prisma
+*.db
+*.sqlite
+routeTree.gen.ts
