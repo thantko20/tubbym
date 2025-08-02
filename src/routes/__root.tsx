@@ -7,7 +7,6 @@ import {
 	HeadContent,
 	Scripts,
 } from "@tanstack/react-router";
-import { ClerkProvider } from "@clerk/tanstack-react-start";
 
 import appCss from "../styles/app.css?url";
 
@@ -45,7 +44,6 @@ function RootComponent() {
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
 	return (
-		<ClerkProvider>
 			<html>
 				<head>
 					<HeadContent />
@@ -55,6 +53,5 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
 					<Scripts />
 				</body>
 			</html>
-		</ClerkProvider>
 	);
 }
