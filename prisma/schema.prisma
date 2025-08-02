@@ -15,7 +15,7 @@ model Video {
   id              String    @id @default(uuid(7))
   title           String
   description     String?
-  key             String    @unique
+  key             String?   @unique
   thumbnailUrl    String?
   durationSeconds Int
   viewsCount      Int       @default(0)
