@@ -1,9 +1,9 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { VideoCard } from "@/features/videos/components/video-card";
 import { VideoUploadFormButton } from "@/features/videos/components/video-upload-form-button";
 import { getVideos } from "@/features/videos/video.service";
-import { createFileRoute } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
 
 const getData = createServerFn().handler(async () => {
 	return {
@@ -11,7 +11,7 @@ const getData = createServerFn().handler(async () => {
 	};
 });
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_layout/")({
 	component: Home,
 	loader: async () => getData(),
 });
@@ -19,7 +19,7 @@ export const Route = createFileRoute("/")({
 function Home() {
 	const { videos } = Route.useLoaderData();
 	return (
-		<div className="max-w-7xl mx-auto px-4 py-8">
+		<div className="">
 			<div className="flex justify-between items-center">
 				<h1 className="text-3xl font-bold mb-8">Video List</h1>
 				<VideoUploadFormButton />

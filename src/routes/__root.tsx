@@ -1,16 +1,30 @@
 // src/routes/__root.tsx
 /// <reference types="vite/client" />
-import type { ReactNode } from "react";
+
 import {
-	Outlet,
-	createRootRoute,
+	createRootRouteWithContext,
 	HeadContent,
+	Outlet,
 	Scripts,
 } from "@tanstack/react-router";
-
+import { createServerFn } from "@tanstack/react-start";
+import { getWebRequest } from "@tanstack/react-start/server";
+import type { ReactNode } from "react";
+import { auth } from "@/lib/auth";
 import appCss from "../styles/app.css?url";
 
-export const Route = createRootRoute({
+const fetchAuth = createServerFn({ method: "GET" }).handler(async () => {
+	const data = await auth.api.getSession(getWebRequest());
+	return data;
+});
+
+export const Route = createRootRouteWithContext()({
+	beforeLoad: async () => {
+		const session = await fetchAuth();
+		return {
+			session,
+		};
+	},
 	head: () => ({
 		meta: [
 			{
@@ -44,14 +58,14 @@ function RootComponent() {
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
 	return (
-			<html>
-				<head>
-					<HeadContent />
-				</head>
-				<body>
-					{children}
-					<Scripts />
-				</body>
-			</html>
+		<html lang="en">
+			<head>
+				<HeadContent />
+			</head>
+			<body>
+				{children}
+				<Scripts />
+			</body>
+		</html>
 	);
 }
