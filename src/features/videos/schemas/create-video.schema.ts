@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { videoVisibility, videoVisibilityOptions } from "../video.constants";
+import { videoVisibilityOptions } from "../video.constants";
 
 export const createVideoSchema = z.object({
 	title: z.string().min(1, "Title is required"),

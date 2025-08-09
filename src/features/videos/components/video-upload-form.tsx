@@ -1,158 +1,151 @@
-import { useForm } from "@tanstack/react-form";
+import { CircleCheck, CircleDashed, Loader } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import {
-	type CreateVideoSchema,
-	createVideoSchema,
-} from "../schemas/create-video.schema";
-import {
-	type VideoVisibility,
-	videoVisibility,
-	videoVisibilityOptions,
-} from "../video.constants";
 
-export const VideoUploadForm = () => {
-	const form = useForm({
-		defaultValues: {
-			title: "",
-			description: "",
-			visibility: videoVisibility.PUBLIC,
-		} as CreateVideoSchema,
-		validators: {
-			onSubmit: createVideoSchema,
-		},
-		onSubmit: async (values) => {
-			// Handle form submission logic here
-			console.log("Form submitted with values:", values);
-			// You can call your API to upload the video or proceed to the next step
-		},
-	});
+interface VideoUploadFormProps {
+	videoId: string;
+	onUploadComplete: () => void;
+	onUploadError: (error: Error) => void;
+}
+
+export function VideoUploadForm({
+	videoId,
+	onUploadComplete,
+	onUploadError,
+}: VideoUploadFormProps) {
+	const [status, setStatus] = useState<
+		"idle" | "uploading" | "processing" | "completed"
+	>("idle");
+	const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+	const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0];
+		if (file) {
+			setSelectedFile(file);
+		}
+	};
+
+	const handleUpload = async () => {
+		if (!selectedFile) return;
+
+		try {
+			setStatus("uploading");
+			// Mock upload
+			await new Promise((resolve) => setTimeout(resolve, 2000));
+
+			setStatus("processing");
+			// Mock processing
+			await new Promise((resolve) => setTimeout(resolve, 2000));
+
+			setStatus("completed");
+			onUploadComplete();
+		} catch (error) {
+			onUploadError(
+				error instanceof Error ? error : new Error("Upload failed"),
+			);
+			setStatus("idle");
+		}
+	};
 
 	return (
-		<form
-			className="space-y-4"
-			onSubmit={(e) => {
-				e.preventDefault();
-				e.stopPropagation();
-				form.handleSubmit();
-			}}
-		>
-			<div className="space-y-2">
-				<form.Field
-					name="title"
-					validators={{
-						onBlur: createVideoSchema.shape.title,
-					}}
-					children={(field) => {
-						return (
+		<div className="space-y-6">
+			<div className="space-y-4">
+				<ul className="space-y-4">
+					<li className="flex items-center space-x-3">
+						{(status === "idle" || status === "uploading") && (
 							<>
-								<Label htmlFor={field.name}>Title</Label>
-								<Input
-									placeholder="Enter video title"
-									id={field.name}
-									name={field.name}
-									value={field.state.value}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-								/>
-								{field.state.meta.errors.length > 0 && (
-									<p className="text-red-500 text-sm mt-1">
-										{field.state.meta.errors[0]?.message}
-									</p>
+								{status === "idle" ? (
+									<CircleDashed className="h-4 w-4 text-muted-foreground" />
+								) : (
+									<Loader className="h-4 w-4 text-primary animate-spin" />
 								)}
-							</>
-						);
-					}}
-				/>
-			</div>
-			<div className="space-y-2">
-				<form.Field
-					name="description"
-					validators={{
-						onBlur: createVideoSchema.shape.description,
-					}}
-					children={(field) => {
-						return (
-							<>
-								<Label htmlFor={field.name}>Description</Label>
-								<Textarea
-									placeholder="Enter video description"
-									id={field.name}
-									name={field.name}
-									value={field.state.value}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-								/>
-								{!field.state.meta.isValid && (
-									<p className="text-red-500 text-sm mt-1">
-										{field.state.meta.errors[0]?.message}
-									</p>
-								)}
-							</>
-						);
-					}}
-				/>
-			</div>
-			<div className="space-y-2">
-				<form.Field
-					name="visibility"
-					validators={{
-						onChange: createVideoSchema.shape.visibility,
-					}}
-					children={(field) => {
-						return (
-							<>
-								<Label htmlFor={field.name}>Visibility</Label>
-								<Select
-									value={field.state.value}
-									onValueChange={(value) => {
-										if (
-											videoVisibilityOptions.includes(value as VideoVisibility)
-										) {
-											field.handleChange(value as VideoVisibility);
-										}
-									}}
-									name={field.name}
+								<span
+									className={
+										status === "uploading"
+											? "text-primary font-medium"
+											: "text-muted-foreground"
+									}
 								>
-									<SelectTrigger className="w-full">
-										<SelectValue placeholder="Select visibility" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value={videoVisibility.PUBLIC}>
-											Public
-										</SelectItem>
-										<SelectItem value={videoVisibility.PRIVATE}>
-											Private
-										</SelectItem>
-										<SelectItem value={videoVisibility.UNLISTED}>
-											Unlisted
-										</SelectItem>
-									</SelectContent>
-								</Select>
-								{!field.state.meta.isValid && (
-									<p className="text-red-500 text-sm mt-1">
-										{field.state.meta.errors[0]?.message}
-									</p>
-								)}
+									Uploading video file
+								</span>
 							</>
-						);
-					}}
-				/>
+						)}
+						{(status === "processing" || status === "completed") && (
+							<>
+								<CircleCheck className="h-4 w-4 text-green-500" />
+								<span className="text-muted-foreground">Upload completed</span>
+							</>
+						)}
+					</li>
+					<li className="flex items-center space-x-3">
+						{status === "processing" ? (
+							<>
+								<Loader className="h-4 w-4 text-primary animate-spin" />
+								<span className="text-primary font-medium">
+									Processing video
+								</span>
+							</>
+						) : status === "completed" ? (
+							<>
+								<CircleCheck className="h-4 w-4 text-green-500" />
+								<span className="text-muted-foreground">
+									Processing completed
+								</span>
+							</>
+						) : (
+							<>
+								<CircleDashed className="h-4 w-4 text-muted-foreground" />
+								<span className="text-muted-foreground">Process video</span>
+							</>
+						)}
+					</li>
+				</ul>
 			</div>
-			<div className="flex justify-end">
-				<Button type="submit" className="min-w-[100px]">
-					Next
+
+			<div className="space-y-4">
+				<div className="space-y-2">
+					<label
+						htmlFor="video-file"
+						className="block text-sm font-medium text-foreground"
+					>
+						Select Video File
+					</label>
+					<input
+						id="video-file"
+						type="file"
+						accept="video/*"
+						onChange={handleFileSelect}
+						disabled={status !== "idle"}
+						className="block w-full text-sm text-muted-foreground
+                            file:mr-4 file:py-2 file:px-4
+                            file:rounded-md file:border-0
+                            file:text-sm file:font-semibold
+                            file:bg-primary file:text-primary-foreground
+                            hover:file:bg-primary/90
+                            disabled:opacity-50 disabled:cursor-not-allowed"
+					/>
+				</div>
+
+				{selectedFile && (
+					<div className="text-sm text-muted-foreground">
+						Selected file: {selectedFile.name}
+					</div>
+				)}
+
+				<Button
+					onClick={handleUpload}
+					disabled={!selectedFile || status !== "idle"}
+					className="w-full"
+				>
+					{status === "uploading"
+						? "Uploading..."
+						: status === "processing"
+							? "Processing..."
+							: status === "completed"
+								? "Completed"
+								: "Start Upload"}
 				</Button>
 			</div>
-		</form>
+		</div>
 	);
-};
+}

@@ -1,6 +1,7 @@
 import { Prisma } from "generated/prisma/client";
 // import { Prisma } from "generated/prisma";
 import { prisma } from "@/lib/prisma";
+import type { CreateVideoSchema } from "./schemas/create-video.schema";
 import type { Video } from "./types";
 
 // Dummy video data for development/testing
@@ -80,6 +81,27 @@ export const getVideos = async (): Promise<Video[]> => {
 	});
 	// return videos.map(enrichVideo);
 	return getDummyVideos();
+};
+
+export const createVideo = async (
+	data: CreateVideoSchema,
+	uploaderId: string,
+) => {
+	const { title, description, visibility } = data;
+
+	const newVideo = await prisma.video.create({
+		data: {
+			title,
+			description,
+			visibility,
+			uploaderId: uploaderId,
+			uploadStatus: "PENDING",
+			durationSeconds: 0,
+		},
+		select: videoSelect,
+	});
+
+	return enrichVideo(newVideo);
 };
 
 function enrichVideo(dbVideo: DbVideo): Video {
