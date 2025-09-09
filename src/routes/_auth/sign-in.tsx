@@ -3,6 +3,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
+const signInWithProvider = async (provider: "google" | "github") => {
+	// Redirect to the backend authentication endpoint
+	window.location.href = `http://localhost:8080/auth/${provider}/login`;
+};
+
 export const Route = createFileRoute("/_auth/sign-in")({
 	component: RouteComponent,
 });
@@ -25,7 +30,7 @@ function RouteComponent() {
 						className="w-full"
 						variant="default"
 						disabled={isGoogleLoading || isGithubLoading}
-						onClick={async () => {}}
+						onClick={async () => signInWithProvider("google")}
 					>
 						<svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
 							<path
