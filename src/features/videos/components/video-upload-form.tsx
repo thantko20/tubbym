@@ -1,22 +1,64 @@
 import { CircleCheck, CircleDashed, Loader } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { createServerFn, useServerFn } from "@tanstack/react-start";
+import { processVideo } from "../video.api";
+import { useEventSource } from "@/lib/sse";
+import { API_BASE_URL, ApiError } from "@/lib/api-utils";
+
+const processVideoFn = createServerFn({ method: "POST" })
+	.validator((videoId: string) => {
+		if (videoId === "") {
+			throw new Error("Video ID is required");
+		}
+		return videoId;
+	})
+	.handler(async ({ data }) => {
+		try {
+			await processVideo(data);
+		} catch (error) {
+			if (error instanceof ApiError) {
+				return { success: false, message: error.message };
+			}
+		}
+	});
+
+type VideoProcessingEvent = {
+	videoId: string;
+	status: string;
+};
 
 interface VideoUploadFormProps {
 	videoId: string;
 	onUploadComplete: () => void;
 	onUploadError: (error: Error) => void;
+	uploadUrl: string | null;
 }
 
 export function VideoUploadForm({
 	videoId,
 	onUploadComplete,
 	onUploadError,
+	uploadUrl,
 }: VideoUploadFormProps) {
+	const processVideoClientFn = useServerFn(processVideoFn);
 	const [status, setStatus] = useState<
 		"idle" | "uploading" | "processing" | "completed"
 	>("idle");
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+	const { close: closeEventSource } = useEventSource<VideoProcessingEvent>({
+		events: {
+			video_update: (data) => {
+				if (data.status === "ready") {
+					setStatus("completed");
+					closeEventSource();
+					onUploadComplete();
+				}
+			},
+		},
+		src: `${API_BASE_URL}/videos/${videoId}/status`,
+	});
 
 	const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
@@ -26,19 +68,29 @@ export function VideoUploadForm({
 	};
 
 	const handleUpload = async () => {
-		if (!selectedFile) return;
+		if (!selectedFile || !uploadUrl) return;
 
 		try {
 			setStatus("uploading");
-			// Mock upload
-			await new Promise((resolve) => setTimeout(resolve, 2000));
+			const response = await fetch(uploadUrl, {
+				method: "PUT",
+				body: selectedFile,
+				headers: {
+					"Content-Type": selectedFile.type,
+				},
+			});
+
+			if (!response.ok) {
+				throw new Error(
+					`Upload failed: ${response.status} ${response.statusText}`,
+				);
+			}
 
 			setStatus("processing");
-			// Mock processing
-			await new Promise((resolve) => setTimeout(resolve, 2000));
 
-			setStatus("completed");
-			onUploadComplete();
+			await processVideoClientFn({
+				data: videoId,
+			});
 		} catch (error) {
 			onUploadError(
 				error instanceof Error ? error : new Error("Upload failed"),

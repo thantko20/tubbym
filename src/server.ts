@@ -5,8 +5,10 @@ import {
 } from "@tanstack/react-start/server";
 import { createRouter } from "./router";
 
-export default createClerkHandler(
-	createStartHandler({
-		createRouter,
-	}),
-)(defaultStreamHandler);
+// export default createClerkHandler(
+// 	createStartHandler({
+// 		createRouter,
+// 	}),
+// )(defaultStreamHandler);
+
+export default createStartHandler({ createRouter })(defaultStreamHandler);

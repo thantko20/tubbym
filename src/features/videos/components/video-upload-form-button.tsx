@@ -15,9 +15,11 @@ export const VideoUploadFormButton = () => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [step, setStep] = useState<"create" | "upload">("create");
 	const [videoId, setVideoId] = useState<string | null>(null);
+	const [presignedUrl, setPresignedUrl] = useState<string | null>(null);
 
-	const handleCreateSuccess = (video: { id: string }) => {
-		setVideoId(video.id);
+	const handleCreateSuccess = (data: { id: string; presignedUrl: string }) => {
+		setVideoId(data.id);
+		setPresignedUrl(data.presignedUrl);
 		setStep("upload");
 	};
 
@@ -67,6 +69,7 @@ export const VideoUploadFormButton = () => {
 							videoId={videoId}
 							onUploadComplete={handleUploadComplete}
 							onUploadError={handleUploadError}
+							uploadUrl={presignedUrl}
 						/>
 					)
 				)}

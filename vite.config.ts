@@ -13,4 +13,10 @@ export default defineConfig({
 		tanstackStart({ customViteReactPlugin: true }),
 		viteReact(),
 	],
+	optimizeDeps: {
+		exclude: ["videojs-hls-quality-selector"],
+	},
+	ssr: {
+		noExternal: ["videojs-hls-quality-selector"],
+	},
 });

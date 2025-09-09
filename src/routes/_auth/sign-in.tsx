@@ -2,7 +2,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/_auth/sign-in")({
 	component: RouteComponent,
@@ -26,17 +25,7 @@ function RouteComponent() {
 						className="w-full"
 						variant="default"
 						disabled={isGoogleLoading || isGithubLoading}
-						onClick={async () => {
-							try {
-								setIsGoogleLoading(true);
-								await authClient.signIn.social({
-									provider: "google",
-								});
-							} catch (error) {
-								setIsGoogleLoading(false);
-								console.error("Google sign-in failed:", error);
-							}
-						}}
+						onClick={async () => {}}
 					>
 						<svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
 							<path
@@ -62,17 +51,7 @@ function RouteComponent() {
 						className="w-full"
 						variant="outline"
 						disabled={isGithubLoading || isGoogleLoading}
-						onClick={async () => {
-							try {
-								setIsGithubLoading(true);
-								await authClient.signIn.social({
-									provider: "github",
-								});
-							} catch (error) {
-								console.error("GitHub sign-in failed:", error);
-								setIsGithubLoading(false);
-							}
-						}}
+						onClick={async () => {}}
 					>
 						<svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
 							<path

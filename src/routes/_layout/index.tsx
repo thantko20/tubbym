@@ -1,13 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import { Button } from "@/components/ui/button";
 import { VideoCard } from "@/features/videos/components/video-card";
 import { VideoUploadFormButton } from "@/features/videos/components/video-upload-form-button";
-import { getVideos } from "@/features/videos/video.service";
+import { getVideos } from "@/features/videos/video.api";
 
 const getData = createServerFn().handler(async () => {
 	return {
-		videos: await getVideos(),
+		videos: await getVideos().then((data) => data || []),
 	};
 });
 

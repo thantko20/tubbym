@@ -1,12 +1,20 @@
 import { ThumbsDownIcon, ThumbsUpIcon } from "lucide-react";
 import type { Video } from "../types";
+import { Link } from "@tanstack/react-router";
 
 export const VideoCard = ({ video }: { video: Video }) => {
 	return (
 		<div
 			key={video.id}
-			className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden flex flex-col"
+			className="relative bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden flex flex-col"
 		>
+			<Link
+				to="/$videoId"
+				params={{
+					videoId: video.id,
+				}}
+				className="absolute inset-0 cursor-pointer"
+			></Link>
 			<div className="aspect-video bg-gray-200">
 				{video.thumbnailUrl ? (
 					<img

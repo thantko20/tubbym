@@ -18,6 +18,9 @@
 			"correctness": {
 				"recommended": true,
 				"noChildrenProp": "off"
+			},
+			"complexity": {
+				"useArrowFunction": "off"
 			}
 		}
 	},

@@ -1,6 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
-import { getWebRequest, setResponseStatus } from "@tanstack/react-start/server";
+import { setResponseStatus } from "@tanstack/react-start/server";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,34 +12,32 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { auth } from "@/lib/auth";
 import {
 	type CreateVideoSchema,
 	createVideoSchema,
 } from "../schemas/create-video.schema";
-import type { Video } from "../types";
 import {
 	type VideoVisibility,
 	videoVisibility,
 	videoVisibilityOptions,
 } from "../video.constants";
-import { createVideo } from "../video.service";
+import { createVideo } from "../video.api";
 
 const createVideoServerFn = createServerFn({ method: "POST" })
 	.validator(createVideoSchema)
 	.handler(async ({ data }) => {
-		const authData = await auth.api.getSession(getWebRequest());
-		if (!authData) {
-			setResponseStatus(401);
-			return {
-				success: false,
-				statusCode: 401,
-				message: "Unauthorized",
-				data: null,
-			} as const;
-		}
+		// const authData = await auth.api.getSession(getWebRequest());
+		// if (!authData) {
+		// 	setResponseStatus(401);
+		// 	return {
+		// 		success: false,
+		// 		statusCode: 401,
+		// 		message: "Unauthorized",
+		// 		data: null,
+		// 	} as const;
+		// }
 		console.log("Creating video with data:", data);
-		const result = await createVideo(data, authData.user.id);
+		const result = await createVideo(data);
 		setResponseStatus(201);
 		return {
 			success: true,
@@ -52,7 +50,7 @@ const createVideoServerFn = createServerFn({ method: "POST" })
 export const VideoCreateForm = ({
 	onSuccess,
 }: {
-	onSuccess?: (data: Video) => void;
+	onSuccess?: (data: { id: string; presignedUrl: string }) => void;
 }) => {
 	const createVideoClientFn = useServerFn(createVideoServerFn);
 	const form = useForm({
@@ -70,7 +68,10 @@ export const VideoCreateForm = ({
 				const result = await createVideoClientFn({ data: value });
 				if (result.success) {
 					console.log("Video created successfully:", result.data);
-					onSuccess?.(result.data);
+					onSuccess?.({
+						id: result.data.videoId,
+						presignedUrl: result.data.presignedUrl,
+					});
 				} else {
 					console.error("Error creating video:", result.message);
 				}
